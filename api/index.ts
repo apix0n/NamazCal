@@ -10,10 +10,6 @@ export const config = {
 
 const app = new Hono().basePath('/api')
 
-app.get('/', (c) => {
-  return c.json({ message: 'Hello Hono!' })
-})
-
 app.get('/ulkeler', async (c) => {
   try {
     const countries = await fetchCountries();
