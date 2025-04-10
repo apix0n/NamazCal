@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { handle } from 'hono/vercel'
 import { fetchPrayerTimesForCity, fetchCountries, fetchCities, fetchDistricts } from '../lib/getPrayerTimes'
 import { createCalendarFromVakti } from '../lib/calendarHandler'
+import { fetchYearlyPrayerTimesForCity } from '../lib/getYearlyPrayerTimes'
 
 export const config = {
   runtime: 'edge'
@@ -46,6 +47,18 @@ app.get('/vakti/:id{[0-9]+}/:timezone', async (c) => {
   const id = parseInt(c.req.param("id"));
   const timezone = c.req.param("timezone");
   const calendar = createCalendarFromVakti(await fetchPrayerTimesForCity(id), timezone);
+  if (!calendar) {
+    return c.text('Error: Unable to generate calendar', 500);
+  }
+  return c.newResponse(calendar, 200, {
+    "content-type": "text/calendar"
+  });
+})
+
+app.get('/vakti/:id{[0-9]+}/:timezone/yillik', async (c) => {
+  const id = parseInt(c.req.param("id"));
+  const timezone = c.req.param("timezone");
+  const calendar = createCalendarFromVakti(await fetchYearlyPrayerTimesForCity(id), timezone);
   if (!calendar) {
     return c.text('Error: Unable to generate calendar', 500);
   }

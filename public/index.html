@@ -113,6 +113,13 @@
         <option value="">Zaman dilimi seçiniz...</option>
     </select>
 
+    <div class="checkbox-container" style="margin: 10px 0;">
+        <input type="checkbox" id="yearlyPrayerTimes" name="yearlyPrayerTimes">
+        <label for="yearlyPrayerTimes" style="text-decoration: underline dotted; cursor: help;" title="Yıllık vakitler tek seferlik indirilir ve otomatik güncellenmez. Takvim aboneliği seçeneği 30 günlük veriyi içerir ve otomatik güncellenir.">
+            Yıllık vakitleri indir
+        </label>
+    </div>
+
     <select id="countries" disabled>
         <option value="">Ülke seçiniz...</option>
     </select>
@@ -134,6 +141,7 @@
     <footer>
         <p>Namaz vakitleri verileri için teşekkürler:</p>
         <p>
+            <a href="https://namazvakitleri.diyanet.gov.tr" target="_blank">namazvakitleri.diyanet.gov.tr</a>,
             <a href="https://ezanvakti.metinsevindik.net" target="_blank">ezanvakti.metinsevindik.net</a>, 
             <a href="https://ezanvakti.emushaf.net" target="_blank">ezanvakti.emushaf.net</a>, 
             <a href="http://api.ezansaatim.com" target="_blank">ezansaatim.com</a>
@@ -220,25 +228,44 @@
         function createCalendarLinks(districtId) {
             const timezone = encodeURIComponent(selects.timezone.value);
             const calendarLinks = document.getElementById('calendarLinks');
-            const baseUrl = `${api}/vakti/${districtId}/${timezone}`;
+            const isYearlyPrayerTimes = document.getElementById('yearlyPrayerTimes').checked;
+            const baseUrl = isYearlyPrayerTimes 
+                ? `${api}/vakti/${districtId}/${timezone}/yillik` 
+                : `${api}/vakti/${districtId}/${timezone}`;
             const fullUrl = `${window.location.protocol}//${window.location.host}${baseUrl}`;
             
-            calendarLinks.innerHTML = `
-                <a href="${baseUrl}" target="_blank" class="download">
-                    Takvimi İndir
-                </a>
-                <a href="webcal://${window.location.host}${baseUrl}" class="subscribe">
-                    Takvime Abone Ol
-                </a>
-            `;
+            if (isYearlyPrayerTimes) {
+                calendarLinks.innerHTML = `
+                    <a href="${baseUrl}" target="_blank" class="download">
+                        Yıllık Vakitleri İndir
+                    </a>
+                `;
+            } else {
+                calendarLinks.innerHTML = `
+                    <a href="${baseUrl}" target="_blank" class="download">
+                        Takvimi İndir
+                    </a>
+                    <a href="webcal://${window.location.host}${baseUrl}" class="subscribe">
+                        Takvime Abone Ol
+                    </a>
+                `;
+            }
+            
             calendarLinks.style.display = 'block';
 
-            document.getElementById('urlDisplay').innerHTML = `
-                Takvim URL'i:
-                <div class="url-display">
-                    ${fullUrl}
-                </div>
-            `;
+            // Only show URL display for non-yearly prayer times
+            const urlDisplay = document.getElementById('urlDisplay');
+            if (!isYearlyPrayerTimes) {
+                urlDisplay.innerHTML = `
+                    Takvim URL'i:
+                    <div class="url-display">
+                        ${fullUrl}
+                    </div>
+                `;
+                urlDisplay.style.display = 'block';
+            } else {
+                urlDisplay.style.display = 'none';
+            }
         }
 
         selects.districts.addEventListener('change', (e) => {

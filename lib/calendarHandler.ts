@@ -1,14 +1,14 @@
 import { createEvents } from 'ics'
 import moment from 'moment-timezone'
 
-interface Vakti {
-    Aksam: string;
-    Gunes: string;
-    Ikindi: string;
+export interface Vakti {
     Imsak: string;
-    MiladiTarihUzunIso8601: string;
+    Gunes: string;
     Ogle: string;
+    Ikindi: string;
+    Aksam: string;
     Yatsi: string;
+    MiladiTarihUzunIso8601: string;
     [key: string]: string;
 }
 
