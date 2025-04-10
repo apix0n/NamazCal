@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namaz Vakitleri Takvimi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        select, button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+        select {
+            font-size: inherit;
+        }
+        #calendarLink {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        #calendarLink a {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .calendar-links {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .calendar-links a {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .calendar-links .subscribe {
+            background-color: #007bff;
+        }
+        .feedback {
+            color: #0056b3;
+            margin: 5px 0;
+            font-style: italic;
+        }
+        .url-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .noscript-warning {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <div class="noscript-warning">
+            Bu uygulama çalışmak için JavaScript gerektirmektedir. Lütfen JavaScript'i etkinleştirin.
+        </div>
+    </noscript>
+
+    <h1>Namaz Vakitleri Takvimi</h1>
+    
+    <div class="warning">
+        <strong>Önemli Uyarı:</strong> Lütfen zaman dilimini doğru seçtiğinizden emin olun. 
+        Yanlış zaman dilimi seçimi, namaz vakitlerinin takvimde yanlış görüntülenmesine neden olacaktır.
+    </div>
+
+    <select id="timezone">
+        <option value="">Zaman dilimi seçiniz...</option>
+    </select>
+
+    <select id="countries" disabled>
+        <option value="">Ülke seçiniz...</option>
+    </select>
+    <div id="cityFeedback" class="feedback"></div>
+
+    <select id="cities" disabled>
+        <option value="">Şehir seçiniz...</option>
+    </select>
+    <div id="districtFeedback" class="feedback"></div>
+
+    <select id="districts" disabled>
+        <option value="">İlçe seçiniz...</option>
+    </select>
+
+    <div id="calendarLink"></div>
+    <div class="calendar-links" id="calendarLinks"></div>
+    <div id="urlDisplay"></div>
+
+    <footer>
+        <p>Namaz vakitleri verileri için teşekkürler:</p>
+        <p>
+            <a href="https://ezanvakti.metinsevindik.net" target="_blank">ezanvakti.metinsevindik.net</a>, 
+            <a href="https://ezanvakti.emushaf.net" target="_blank">ezanvakti.emushaf.net</a>, 
+            <a href="http://api.ezansaatim.com" target="_blank">ezansaatim.com</a>
+        </p>
+        <p><a href="https://github.com/apix0n" target="_blank">apix</a> tarafından yapılmıştır.</p>
+    </footer>
+
+    <script>
+        const api = '/api';
+        const selects = {
+            countries: document.getElementById('countries'),
+            cities: document.getElementById('cities'),
+            districts: document.getElementById('districts'),
+            timezone: document.getElementById('timezone')
+        };
+
+        async function fetchData(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        }
+
+        async function loadCountries() {
+            try {
+                selects.countries.innerHTML = '<option value="">Yükleniyor... (Ülke seçiniz)</option>';
+                const countries = await fetchData(`${api}/ulkeler`);
+                selects.countries.innerHTML = '<option value="">Ülke seçiniz...</option>' +
+                    countries.map(country => 
+                        `<option value="${country.UlkeID}">${country.UlkeAdi}</option>`
+                    ).join('');
+                selects.countries.disabled = false;
+            } catch (error) {
+                console.error('Error loading countries:', error);
+            }
+        }
+
+        selects.countries.addEventListener('change', async (e) => {
+            if (!e.target.value) return;
+            document.getElementById('cityFeedback').textContent = '';
+            selects.cities.innerHTML = '<option value="">Yükleniyor... (Şehir seçiniz)</option>';
+            selects.cities.disabled = true;
+            selects.cities.style.display = 'block';
+            try {
+                const cities = await fetchData(`${api}/sehirler/${e.target.value}`);
+                if (cities.length === 1) {
+                    selects.cities.style.display = 'none';
+                    document.getElementById('cityFeedback').textContent = `Otomatik seçildi: ${cities[0].SehirAdi}`;
+                    loadDistricts(cities[0].SehirID);
+                } else {
+                    selects.cities.innerHTML = '<option value="">Şehir seçiniz...</option>' +
+                        cities.map(city => 
+                            `<option value="${city.SehirID}">${city.SehirAdi}</option>`
+                        ).join('');
+                    selects.cities.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error loading cities:', error);
+            }
+        });
+
+        async function loadDistricts(cityId) {
+            document.getElementById('districtFeedback').textContent = '';
+            selects.districts.innerHTML = '<option value="">Yükleniyor... (İlçe seçiniz)</option>';
+            selects.districts.disabled = true;
+            try {
+                const districts = await fetchData(`${api}/ilceler/${cityId}`);
+                if (districts.length === 1) {
+                    selects.districts.style.display = 'none';
+                    document.getElementById('districtFeedback').textContent = `Otomatik seçildi: ${districts[0].IlceAdi}`;
+                    createCalendarLinks(districts[0].IlceID);
+                } else {
+                    selects.districts.innerHTML = '<option value="">İlçe seçiniz...</option>' +
+                        districts.map(district => 
+                            `<option value="${district.IlceID}">${district.IlceAdi}</option>`
+                        ).join('');
+                    selects.districts.disabled = false;
+                    selects.districts.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading districts:', error);
+            }
+        }
+
+        function createCalendarLinks(districtId) {
+            const timezone = encodeURIComponent(selects.timezone.value);
+            const calendarLinks = document.getElementById('calendarLinks');
+            const baseUrl = `${api}/vakti/${districtId}/${timezone}`;
+            const fullUrl = `${window.location.protocol}//${window.location.host}${baseUrl}`;
+            
+            calendarLinks.innerHTML = `
+                <a href="${baseUrl}" target="_blank" class="download">
+                    Takvimi İndir
+                </a>
+                <a href="webcal://${window.location.host}${baseUrl}" class="subscribe">
+                    Takvime Abone Ol
+                </a>
+            `;
+            calendarLinks.style.display = 'block';
+
+            document.getElementById('urlDisplay').innerHTML = `
+                Takvim URL'i:
+                <div class="url-display">
+                    ${fullUrl}
+                </div>
+            `;
+        }
+
+        selects.districts.addEventListener('change', (e) => {
+            if (!e.target.value) return;
+            createCalendarLinks(e.target.value);
+        });
+
+        function populateTimezones() {
+            const timezoneSelect = selects.timezone;
+            const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            // Get all timezone options
+            const timezonesRaw = Intl.supportedValuesOf('timeZone');
+            
+            // Create timezone objects with readable names
+            const timezones = timezonesRaw.map(zone => {
+                try {
+                    const readable = new Date().toLocaleString('tr-TR', { timeZone: zone, timeZoneName: 'long' });
+                    return { id: zone, name: `${zone} (${readable.split(' ').pop()})` };
+                } catch (e) {
+                    return { id: zone, name: zone };
+                }
+            });
+
+            // Sort timezones, putting the current timezone first
+            timezones.sort((a, b) => {
+                if (a.id === currentTimezone) return -1;
+                if (b.id === currentTimezone) return 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            timezoneSelect.innerHTML = timezones.map(tz => 
+                `<option value="${tz.id}" ${tz.id === currentTimezone ? 'selected' : ''}>${tz.name}</option>`
+            ).join('');
+        }
+
+        selects.timezone.addEventListener('change', () => {
+            const districtsSelect = selects.districts;
+            if (districtsSelect.value) {
+                createCalendarLinks(districtsSelect.value);
+            }
+        });
+
+        populateTimezones();
+        loadCountries();
+    </script>
+</body>
+</html>
