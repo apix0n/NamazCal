@@ -7,7 +7,7 @@ Namaz vakitlerini takvim uygulamalarına (Google Calendar, Apple Calendar, vb.) 
 1. Web sitesini ziyaret edin
 2. Zaman dilimini kontrol edin
 3. Ülke, şehir ve ilçe seçin
-4. "Takvime Abone Ol" linkine tıklayın
+4. "Takvime Abone Ol" linkine tıklayın veya yıllık vakitleri indirin
 
 ## Geliştirme
 
@@ -27,6 +27,10 @@ npm run build
 ## Katkıda Bulunanlar
 
 API sağlayıcıları:
+- [namazvakitleri.diyanet.gov.tr](https://namazvakitleri.diyanet.gov.tr) (Yıllık vakitler)
 - [ezanvakti.metinsevindik.net](https://ezanvakti.metinsevindik.net)
 - [ezanvakti.emushaf.net](https://ezanvakti.emushaf.net)
 - [ezansaatim.com](http://api.ezansaatim.com)
+
+CORS Proxy:
+- [allorigins.win](https://allorigins.win)
