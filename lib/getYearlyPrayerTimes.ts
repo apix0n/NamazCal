@@ -29,6 +29,8 @@ export async function fetchYearlyPrayerTimesForCity(cityId: number): Promise<Vak
     try {
         const response = await fetch(`${baseUrl}${cityId}`);
 
+        console.log(response)
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
