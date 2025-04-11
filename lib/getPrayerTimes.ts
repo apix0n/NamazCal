@@ -19,6 +19,8 @@ const endpoints = [
     }
 ]
 
+export const endpointsCount = endpoints.length
+
 export async function fetchPrayerTimesForCity(id: number, endpoint: number = 0) {
     try {
         const response = await fetch(endpoints[endpoint].prayers + id);
