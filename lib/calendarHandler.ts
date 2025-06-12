@@ -52,7 +52,7 @@ function createDayEvents(vakti: Vakti, timezone: string) {
         const utcTime = prayerTime.utc();
 
         return {
-            title: `${prayer.name} Namazı`,
+            title: prayer.name,
             start: [
                 utcTime.year(),
                 utcTime.month() + 1, // moment months are 0-based
