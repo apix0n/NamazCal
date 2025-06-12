@@ -1,5 +1,5 @@
-import { createEvents } from 'ics'
-import moment from 'moment-timezone'
+import ical, { ICalEventData } from 'ical-generator';
+import moment from 'moment-timezone';
 
 export interface Vakti {
     Imsak: string;
@@ -13,20 +13,21 @@ export interface Vakti {
 }
 
 export function createCalendarFromVakti(data: Array<Vakti>, timezone: string) {
-    const events = data.flatMap(vakti => createDayEvents(vakti, timezone));
-    const { error, value } = createEvents(events, {
-        calName: "Namaz Vakitleri",
-        productId: "apix/namazVakitleri"
+    const calendar = ical({
+        name: 'Namaz Vakitleri',
+        prodId: 'apix/NamazCal',
+        timezone: timezone
     });
 
-    if (error) {
-        throw error;
-    }
+    data.forEach(vakti => {
+        const events = createDayEvents(vakti, timezone);
+        events.forEach(event => calendar.createEvent(event));
+    });
 
-    return value;
+    return calendar.toString();
 }
 
-function createDayEvents(vakti: Vakti, timezone: string) {
+function createDayEvents(vakti: Vakti, timezone: string): ICalEventData[] {
     const [datePart] = vakti.MiladiTarihUzunIso8601.split('T');
 
     const prayers = [
@@ -40,28 +41,22 @@ function createDayEvents(vakti: Vakti, timezone: string) {
 
     return prayers.map(prayer => {
         const [hours, minutes] = prayer.time.split(':').map(Number);
-        
+
         // Create moment object in the specified timezone
-        const prayerTime = moment.tz(
+        const startTime = moment.tz(
             `${datePart} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
             'YYYY-MM-DD HH:mm',
             timezone
         );
 
-        // Convert to UTC
-        const utcTime = prayerTime.utc();
+        const endTime = startTime.clone().add(30, 'minutes');
 
         return {
-            title: prayer.name,
-            start: [
-                utcTime.year(),
-                utcTime.month() + 1, // moment months are 0-based
-                utcTime.date(),
-                utcTime.hours(),
-                utcTime.minutes()
-            ] as [number, number, number, number, number],
-            duration: { minutes: 30 },
-            startInputType: 'utc' as 'utc',
+            summary: prayer.name,
+            start: startTime.toDate(),
+            end: endTime.toDate(),
+            timezone: timezone,
+            id: `${startTime.format("YYYY-MM-DD-HHMM")}`
         };
     });
 }
