@@ -27,7 +27,7 @@ function convertTurkishDateToISO(turkishDate: string): string {
 
 export async function fetchYearlyPrayerTimesForCity(cityId: number): Promise<Vakti[]> {
     try {
-        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`${baseUrl}${cityId}`)}`, {
+        const response = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(`${baseUrl}${cityId}`)}`, {
             headers: {
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                 'Accept-Language': 'tr,en;q=0.9',
