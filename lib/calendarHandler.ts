@@ -30,12 +30,12 @@ function createDayEvents(vakti: Vakti, timezone: string) {
     const [datePart] = vakti.MiladiTarihUzunIso8601.split('T');
 
     const prayers = [
-        { name: 'İmsak', time: vakti.Imsak },
+        { name: 'Sabah Namazı / İmsak', time: vakti.Imsak },
         { name: 'Güneş', time: vakti.Gunes },
-        { name: 'Öğle', time: vakti.Ogle },
-        { name: 'İkindi', time: vakti.Ikindi },
-        { name: 'Akşam', time: vakti.Aksam },
-        { name: 'Yatsı', time: vakti.Yatsi }
+        { name: 'Öğle Namazı', time: vakti.Ogle },
+        { name: 'İkindi Namazı', time: vakti.Ikindi },
+        { name: 'Akşam Namazı', time: vakti.Aksam },
+        { name: 'Yatsı Namazı', time: vakti.Yatsi }
     ];
 
     return prayers.map(prayer => {
