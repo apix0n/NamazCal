@@ -16,7 +16,6 @@ export function createCalendarFromVakti(data: Array<Vakti>, timezone: string) {
     const calendar = ical({
         name: 'Namaz Vakitleri',
         prodId: 'apix/NamazCal',
-        timezone: timezone
     });
 
     data.forEach(vakti => {
@@ -55,7 +54,6 @@ function createDayEvents(vakti: Vakti, timezone: string): ICalEventData[] {
             summary: prayer.name,
             start: startTime.toDate(),
             end: endTime.toDate(),
-            timezone: timezone,
             id: `${startTime.format("YYYY-MM-DD-HHMM")}`
         };
     });
