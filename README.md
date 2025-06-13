@@ -31,6 +31,3 @@ API sağlayıcıları:
 - [ezanvakti.metinsevindik.net](https://ezanvakti.metinsevindik.net)
 - [ezanvakti.emushaf.net](https://ezanvakti.emushaf.net)
 - [ezansaatim.com](http://api.ezansaatim.com)
-
-CORS Proxy:
-- [allorigins.win](https://allorigins.win)
